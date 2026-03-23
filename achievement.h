@@ -65,6 +65,24 @@ typedef enum
   SIZE_MBF32_LE
 } Size;
 
+typedef enum
+{
+  OP_NONE,
+  OP_EQUAL,
+  OP_INF,
+  OP_INF_EQUAL,
+  OP_SUP,
+  OP_SUP_EQUAL,
+  OP_NOT_EQUAL,
+  OP_FACTOR,
+  OP_QUOTIENT,
+  OP_MOD,
+  OP_PLUS,
+  OP_MINUS,
+  OP_AND,
+  OP_XOR
+} Operator;
+
 struct NUMERAL
 {
   Type type;
@@ -76,7 +94,7 @@ struct CONDITION
 {
   int id;
   Flag flag;
-  char op;
+  Operator op;
   int hit_target;
 
   struct NUMERAL lhs;
