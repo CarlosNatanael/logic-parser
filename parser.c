@@ -267,7 +267,7 @@ Operator get_op(char *condition, size_t len, int *index)
         return OP_XOR;
         break;
     }
-  *index = 0;
+  *index = len;
   return OP_NONE;
 }
 
@@ -329,5 +329,38 @@ struct CONDITION *get_condition(char *condition, size_t len)
   output->rhs = *get_numeral(rhs, rhs_len);
   free(rhs);
 
+  return output;
+}
+
+struct GROUP *get_group(char *group, size_t len)
+{
+  size_t max_condition = 1;
+  for (int i = 0; i < len; i ++)
+    if (group[i] == condition_separator) max_condition ++;
+
+  struct GROUP *output = malloc(sizeof(struct GROUP) + max_condition * sizeof(struct CONDITION *));
+
+  int current_id = 0;
+  int last_separator_index = 0;
+  for (int i=0; i < len; i ++)
+  {
+    if (group[i] == condition_separator || i == len - 1)
+    {
+      int condition_len = i - last_separator_index + 1;
+      last_separator_index = i + 1;
+      char *condition_str = malloc(condition_len + 1);
+
+      memcpy(condition_str, group + last_separator_index, condition_len);
+      struct CONDITION *condition = get_condition(condition_str, condition_len);
+      free(condition_str);
+
+      condition->id = current_id;
+
+      output->conditions[current_id] = condition;
+
+      current_id ++;
+    }
+  }
+  output->condition_count = current_id;
   return output;
 }
