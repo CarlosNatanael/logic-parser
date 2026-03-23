@@ -77,6 +77,7 @@ struct CONDITION
   int id;
   Flag flag;
   char op;
+  int hit_target;
 
   struct NUMERAL lhs;
   struct NUMERAL rhs;
@@ -99,4 +100,4 @@ struct ACHIEVEMENT
   struct GROUP **groups[];
 };
 
-#endif // ACHIEVEMENT_H
+#endif // !ACHIEVEMENT_H
