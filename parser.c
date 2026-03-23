@@ -104,7 +104,7 @@ Size get_size(char *numeral, size_t len, Type type)
   for (int i = 0; i < sizeof(char_size); i ++)
   {
     if (i < 18 && is_float == 0 && char_size[i] == numeral[index]) return i + 1;
-    if (i > 18 && is_float == 1 && char_size[i] == numeral[index]) return i + 1;
+    if (i >= 18 && is_float == 1 && char_size[i] == numeral[index]) return i + 1;
   }
   return SIZE_WORD; // 16-bit is ' ' but can also be '';
 }
@@ -346,19 +346,25 @@ struct GROUP *get_group(char *group, size_t len)
   {
     if (group[i] == condition_separator || i == len - 1)
     {
-      int condition_len = i - last_separator_index + 1;
-      last_separator_index = i + 1;
+      int condition_len = i - last_separator_index;
+
+      if (i == len - 1 && group[i] != condition_separator) {
+        condition_len++;
+      }
+
       char *condition_str = malloc(condition_len + 1);
 
       memcpy(condition_str, group + last_separator_index, condition_len);
+      condition_str[condition_len] = '\0';
+
       struct CONDITION *condition = get_condition(condition_str, condition_len);
       free(condition_str);
 
-      condition->id = current_id;
-
+      condition->id = current_id + 1; // lines ID are 1 indexed to stay consistent with RAInt
       output->conditions[current_id] = condition;
-
       current_id ++;
+
+      last_separator_index = i + 1;
     }
   }
   output->condition_count = current_id;
