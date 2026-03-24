@@ -344,29 +344,65 @@ struct GROUP *get_group(char *group, size_t len)
   int last_separator_index = 0;
   for (int i=0; i < len; i ++)
   {
-    if (group[i] == condition_separator || i == len - 1)
-    {
-      int condition_len = i - last_separator_index;
+    if (group[i] != condition_separator && i != len - 1) continue;
 
-      if (i == len - 1 && group[i] != condition_separator) {
-        condition_len++;
-      }
+    int condition_len = i - last_separator_index;
 
-      char *condition_str = malloc(condition_len + 1);
+    if (i == len - 1 && group[i] != condition_separator) condition_len++;
 
-      memcpy(condition_str, group + last_separator_index, condition_len);
-      condition_str[condition_len] = '\0';
+    char *condition_str = malloc(condition_len + 1);
 
-      struct CONDITION *condition = get_condition(condition_str, condition_len);
-      free(condition_str);
+    memcpy(condition_str, group + last_separator_index, condition_len);
+    condition_str[condition_len] = '\0';
 
-      condition->id = current_id + 1; // lines ID are 1 indexed to stay consistent with RAInt
-      output->conditions[current_id] = condition;
-      current_id ++;
+    struct CONDITION *condition = get_condition(condition_str, condition_len);
+    free(condition_str);
 
-      last_separator_index = i + 1;
-    }
+    condition->id = current_id + 1; // lines ID are 1 indexed to stay consistent with RAInt
+    output->conditions[current_id] = condition;
+    current_id ++;
+
+    last_separator_index = i + 1;
   }
-  output->condition_count = current_id;
+
+  output->condition_count = max_condition;
+  return output;
+}
+
+struct ACHIEVEMENT *get_achievement(char *achievement, size_t len)
+{
+  size_t max_group = 1;
+  for (int i = 1; i < len; i ++)
+    if (achievement[i] == group_separator && achievement[i - 1] != 'x') max_group ++;
+
+  struct ACHIEVEMENT *output = malloc(sizeof(struct ACHIEVEMENT) + max_group * sizeof(struct GROUP **));
+
+  int current_id = 0;
+  int last_separator_index = 0;
+  for (int i = 1; i < len; i ++)
+  {
+    if (achievement[i] != group_separator && i != len - 1) continue;
+    if (achievement[i - 1] == 'x') continue; // 'S' is also a size marker for Bit6
+
+    int group_len = i - last_separator_index;
+
+    if (achievement[i] != group_separator && i == len - 1) group_len ++;
+
+    char *group_str = malloc(group_len + 1);
+
+    memcpy(group_str, achievement + last_separator_index, group_len);
+    group_str[group_len] = '\0';
+
+    struct GROUP *group = get_group(group_str, group_len);
+    free(group_str);
+
+    group->id = current_id;
+    output->groups[current_id] = group;
+    current_id++;
+
+    last_separator_index = i + 1;
+  }
+
+  output->group_count = max_group;
   return output;
 }

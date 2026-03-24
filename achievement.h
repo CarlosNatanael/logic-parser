@@ -115,7 +115,7 @@ struct ACHIEVEMENT
   char *description;
 
   size_t group_count;
-  struct GROUP **groups[];
+  struct GROUP *groups[];
 };
 
 #endif // !ACHIEVEMENT_H

@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     input_buffer[strcspn(input_buffer, "\n")] = '\0';
     if (strcmp(input_buffer, "exit") == 0) break;
 
-    struct GROUP *group = get_group(input_buffer, strlen(input_buffer));
+    struct ACHIEVEMENT *achievement = get_achievement(input_buffer, strlen(input_buffer));
 
     int id_collumn_width = 4;
     int flag_collumn_width = 14;
@@ -96,50 +96,64 @@ int main(int argc, char *argv[])
     int value_collumn_width = 11;
     int op_collumn_width = 2;
     int hit_target_collumn_width = 10;
+    int alt_group_line_length = 86;
 
 
+    printf("\n");
     printf("| ID |     FLAG     | TYPE  |   SIZE    |  VALUE   |OP| TYPE  |   SIZE    |  VALUE   | HIT TARGET |\n");
-    printf("---------------------------------------------------------------------------------------------------\n");
 
-    for (int i = 0; i < group->condition_count; i ++)
+    for (int i = 0; i < achievement->group_count; i ++)
     {
-      printf("|%-*d| ", id_collumn_width, group->conditions[i]->id);
-      printf("%-*s", flag_collumn_width, FLAGS[group->conditions[i]->flag]);
-      printf("%-*s", type_collumn_width, TYPES[group->conditions[i]->lhs.type]);
-      printf("%-*s", size_collumn_width, SIZES[group->conditions[i]->lhs.size]);
-      if (group->conditions[i]->lhs.type != TYPE_RECALL)
-        printf("%-#*x", value_collumn_width, group->conditions[i]->lhs.value);
-      else printf ("%*c", value_collumn_width, ' ');
-      if (group->conditions[i]->op != OP_NONE)
-      {
-        printf("%-*s ", op_collumn_width, OP[group->conditions[i]->op]);
-        printf("%-*s", type_collumn_width, TYPES[group->conditions[i]->rhs.type]);
-        printf("%-*s", size_collumn_width, SIZES[group->conditions[i]->rhs.size]);
-        if (group->conditions[i]->rhs.type != TYPE_RECALL)
-          printf("%-#*x", value_collumn_width, group->conditions[i]->rhs.value);
-        else printf("%*c", value_collumn_width, ' ');
-      }
+      struct GROUP *group = achievement->groups[i];
+
+      printf("|-------------------------------------------------------------------------------------------------|\n");
+      if (group->id == 0)
+        printf("| CORE GROUP                                                                                      |\n");
       else
+        printf("| ALT GROUP %-*d|\n", alt_group_line_length, group->id);
+      printf("|-------------------------------------------------------------------------------------------------|\n");
+
+
+      for (int j = 0; j < group->condition_count; j ++)
       {
-        printf("%*c ", op_collumn_width, ' ');
-        printf("%*c", type_collumn_width, ' ');
-        printf("%*c", size_collumn_width, ' ');
-        printf("%*c", value_collumn_width, ' ');
+        printf("|%-*d| ", id_collumn_width, group->conditions[j]->id);
+        printf("%-*s", flag_collumn_width, FLAGS[group->conditions[j]->flag]);
+        printf("%-*s", type_collumn_width, TYPES[group->conditions[j]->lhs.type]);
+        printf("%-*s", size_collumn_width, SIZES[group->conditions[j]->lhs.size]);
+        if (group->conditions[j]->lhs.type != TYPE_RECALL)
+          printf("%-#*x", value_collumn_width, group->conditions[j]->lhs.value);
+        else printf ("%*c", value_collumn_width, ' ');
+        if (group->conditions[j]->op != OP_NONE)
+        {
+          printf("%-*s ", op_collumn_width, OP[group->conditions[j]->op]);
+          printf("%-*s", type_collumn_width, TYPES[group->conditions[j]->rhs.type]);
+          printf("%-*s", size_collumn_width, SIZES[group->conditions[j]->rhs.size]);
+          if (group->conditions[j]->rhs.type != TYPE_RECALL)
+            printf("%-#*x", value_collumn_width, group->conditions[j]->rhs.value);
+          else printf("%*c", value_collumn_width, ' ');
+        }
+        else
+        {
+          printf("%*c ", op_collumn_width, ' ');
+          printf("%*c", type_collumn_width, ' ');
+          printf("%*c", size_collumn_width, ' ');
+          printf("%*c", value_collumn_width, ' ');
+        }
+        if (group->conditions[j]->flag != FLAG_ADD_SOURCE
+         && group->conditions[j]->flag != FLAG_SUB_SOURCE
+         && group->conditions[j]->flag != FLAG_ADD_ADDRESS
+         && group->conditions[j]->flag != FLAG_REMEMBER)
+        {
+          char hit_target_str[100];
+          sprintf(hit_target_str, "%d", group->conditions[j]->hit_target);
+          printf("(%s)", hit_target_str);
+          printf("%*c|\n", (int)(hit_target_collumn_width - strlen(hit_target_str)), ' ');
+        }
+        else printf("%*c|\n", hit_target_collumn_width + 2, ' '); // adding 2 for the '()'
       }
-      if (group->conditions[i]->flag != FLAG_ADD_SOURCE
-       && group->conditions[i]->flag != FLAG_SUB_SOURCE
-       && group->conditions[i]->flag != FLAG_ADD_ADDRESS
-       && group->conditions[i]->flag != FLAG_REMEMBER)
-      {
-        char hit_target_str[100];
-        sprintf(hit_target_str, "%d", group->conditions[i]->hit_target);
-        printf("(%s)", hit_target_str);
-        printf("%*c|\n", (int)(hit_target_collumn_width - strlen(hit_target_str)), ' ');
-      }
-      else printf("%*c|\n", hit_target_collumn_width + 2, ' '); // adding 2 for the '()'
     }
 
-    printf("---------------------------------------------------------------------------------------------------\n");
+    printf("|-------------------------------------------------------------------------------------------------|\n");
   }
 
   return EXIT_SUCCESS;
