@@ -3,6 +3,9 @@
 
 #include "achievement.h"
 
+#define MINIMUM_LEADERBOARD_LENGTH 34
+#define SIZE_REQUIRE_TYPE_FLOAT 18
+
 extern const char condition_separator;
 extern const char group_separator;
 extern const char char_flag[];
@@ -27,5 +30,7 @@ struct CONDITION *get_condition(char condition[], size_t len);
 
 struct GROUP *get_group(char group[], size_t len);
 struct ACHIEVEMENT *get_achievement(char achievement[], size_t len);
+
+struct LEADERBOARD *get_leaderboard(char leaderboard[], size_t len);
 
 #endif // !PARSER_H

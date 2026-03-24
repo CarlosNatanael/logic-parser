@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     input_buffer[strcspn(input_buffer, "\n")] = '\0';
     if (strcmp(input_buffer, "exit") == 0) break;
 
-    struct ACHIEVEMENT *achievement = get_achievement(input_buffer, strlen(input_buffer));
+    struct LEADERBOARD *leaderboard = get_leaderboard(input_buffer, strlen(input_buffer));
 
     int id_collumn_width = 4;
     int flag_collumn_width = 14;
@@ -99,61 +99,99 @@ int main(int argc, char *argv[])
     int alt_group_line_length = 86;
 
 
-    printf("\n");
-    printf("| ID |     FLAG     | TYPE  |   SIZE    |  VALUE   |OP| TYPE  |   SIZE    |  VALUE   | HIT TARGET |\n");
 
-    for (int i = 0; i < achievement->group_count; i ++)
+
+    for (int i = 0; i < 4; i ++)
     {
-      struct GROUP *group = achievement->groups[i];
-
-      printf("|-------------------------------------------------------------------------------------------------|\n");
-      if (group->id == 0)
-        printf("| CORE GROUP                                                                                      |\n");
-      else
-        printf("| ALT GROUP %-*d|\n", alt_group_line_length, group->id);
-      printf("|-------------------------------------------------------------------------------------------------|\n");
-
-
-      for (int j = 0; j < group->condition_count; j ++)
+      struct ACHIEVEMENT *achievement;
+      switch (i)
       {
-        printf("|%-*d| ", id_collumn_width, group->conditions[j]->id);
-        printf("%-*s", flag_collumn_width, FLAGS[group->conditions[j]->flag]);
-        printf("%-*s", type_collumn_width, TYPES[group->conditions[j]->lhs.type]);
-        printf("%-*s", size_collumn_width, SIZES[group->conditions[j]->lhs.size]);
-        if (group->conditions[j]->lhs.type != TYPE_RECALL)
-          printf("%-#*x", value_collumn_width, group->conditions[j]->lhs.value);
-        else printf ("%*c", value_collumn_width, ' ');
-        if (group->conditions[j]->op != OP_NONE)
-        {
-          printf("%-*s ", op_collumn_width, OP[group->conditions[j]->op]);
-          printf("%-*s", type_collumn_width, TYPES[group->conditions[j]->rhs.type]);
-          printf("%-*s", size_collumn_width, SIZES[group->conditions[j]->rhs.size]);
-          if (group->conditions[j]->rhs.type != TYPE_RECALL)
-            printf("%-#*x", value_collumn_width, group->conditions[j]->rhs.value);
-          else printf("%*c", value_collumn_width, ' ');
-        }
-        else
-        {
-          printf("%*c ", op_collumn_width, ' ');
-          printf("%*c", type_collumn_width, ' ');
-          printf("%*c", size_collumn_width, ' ');
-          printf("%*c", value_collumn_width, ' ');
-        }
-        if (group->conditions[j]->flag != FLAG_ADD_SOURCE
-         && group->conditions[j]->flag != FLAG_SUB_SOURCE
-         && group->conditions[j]->flag != FLAG_ADD_ADDRESS
-         && group->conditions[j]->flag != FLAG_REMEMBER)
-        {
-          char hit_target_str[100];
-          sprintf(hit_target_str, "%d", group->conditions[j]->hit_target);
-          printf("(%s)", hit_target_str);
-          printf("%*c|\n", (int)(hit_target_collumn_width - strlen(hit_target_str)), ' ');
-        }
-        else printf("%*c|\n", hit_target_collumn_width + 2, ' '); // adding 2 for the '()'
+        case 0:
+          achievement = leaderboard->start;
+          printf("\n\n\n");
+          printf("|-------------------------------------------------------------------------------------------------|\n");
+          printf("| START                                                                                           |\n");
+          printf("|-------------------------------------------------------------------------------------------------|\n");
+          break;
+        case 1:
+          achievement = leaderboard->cancel;
+          printf("\n\n");
+          printf("|-------------------------------------------------------------------------------------------------|\n");
+          printf("| CANCEL                                                                                          |\n");
+          printf("|-------------------------------------------------------------------------------------------------|\n");
+          break;
+        case 2:
+          achievement = leaderboard->submit;
+          printf("\n\n");
+          printf("|-------------------------------------------------------------------------------------------------|\n");
+          printf("| SUBMIT                                                                                          |\n");
+          printf("|-------------------------------------------------------------------------------------------------|\n");
+          break;
+        case 3:
+          achievement = leaderboard->value;
+          printf("\n\n");
+          printf("|-------------------------------------------------------------------------------------------------|\n");
+          printf("| VALUE                                                                                           |\n");
+          printf("|-------------------------------------------------------------------------------------------------|\n");
+          break;
       }
-    }
+
+      printf("| #  |     Flag     | Type  |   Size    |  Value   |op| Type  |   Size    |  Value   | Hit Target |\n");
+
+      for (int j = 0; j < achievement->group_count; j ++)
+      {
+        struct GROUP *group = achievement->groups[j];
+
+        printf("|-------------------------------------------------------------------------------------------------|\n");
+        if (group->id == 0)
+          printf("| Core Group                                                                                      |\n");
+        else
+          printf("| Alt Group %-*d|\n", alt_group_line_length, group->id);
+        printf("|-------------------------------------------------------------------------------------------------|\n");
+
+
+        for (int k = 0; k < group->condition_count; k ++)
+        {
+          printf("|%-*d| ", id_collumn_width, group->conditions[k]->id);
+          printf("%-*s", flag_collumn_width, FLAGS[group->conditions[k]->flag]);
+          printf("%-*s", type_collumn_width, TYPES[group->conditions[k]->lhs.type]);
+          printf("%-*s", size_collumn_width, SIZES[group->conditions[k]->lhs.size]);
+          if (group->conditions[k]->lhs.type != TYPE_RECALL)
+            printf("%-#*x", value_collumn_width, group->conditions[k]->lhs.value);
+          else printf ("%*c", value_collumn_width, ' ');
+          if (group->conditions[k]->op != OP_NONE)
+          {
+            printf("%-*s ", op_collumn_width, OP[group->conditions[k]->op]);
+            printf("%-*s", type_collumn_width, TYPES[group->conditions[k]->rhs.type]);
+            printf("%-*s", size_collumn_width, SIZES[group->conditions[k]->rhs.size]);
+            if (group->conditions[k]->rhs.type != TYPE_RECALL)
+              printf("%-#*x", value_collumn_width, group->conditions[k]->rhs.value);
+            else printf("%*c", value_collumn_width, ' ');
+          }
+          else
+          {
+            printf("%*c ", op_collumn_width, ' ');
+            printf("%*c", type_collumn_width, ' ');
+            printf("%*c", size_collumn_width, ' ');
+            printf("%*c", value_collumn_width, ' ');
+          }
+          if (group->conditions[k]->flag != FLAG_ADD_SOURCE
+           && group->conditions[k]->flag != FLAG_SUB_SOURCE
+           && group->conditions[k]->flag != FLAG_ADD_ADDRESS
+           && group->conditions[k]->flag != FLAG_REMEMBER)
+          {
+            char hit_target_str[100];
+            sprintf(hit_target_str, "%d", group->conditions[k]->hit_target);
+            printf("(%s)", hit_target_str);
+            printf("%*c|\n", (int)(hit_target_collumn_width - strlen(hit_target_str)), ' ');
+          }
+          else printf("%*c|\n", hit_target_collumn_width + 2, ' '); // adding 2 for the '()'
+        }
+      }
 
     printf("|-------------------------------------------------------------------------------------------------|\n");
+
+    }
   }
 
   return EXIT_SUCCESS;

@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
@@ -76,7 +77,7 @@ Type get_type(char *numeral, size_t len)
   // Floats are either f4.5 or fFABCDEF. first one is of type Float, second is Mem
   if (numeral[0] == 'f')
   {
-    for (int i = 18; i < sizeof(char_size); i++)
+    for (int i = SIZE_REQUIRE_TYPE_FLOAT; i < sizeof(char_size); i++)
       if (char_size[i] == numeral[1]) return TYPE_MEM;
     return TYPE_FLOAT;
   }
@@ -103,8 +104,8 @@ Size get_size(char *numeral, size_t len, Type type)
 
   for (int i = 0; i < sizeof(char_size); i ++)
   {
-    if (i < 18 && is_float == 0 && char_size[i] == numeral[index]) return i + 1;
-    if (i >= 18 && is_float == 1 && char_size[i] == numeral[index]) return i + 1;
+    if (i < SIZE_REQUIRE_TYPE_FLOAT && is_float == 0 && char_size[i] == numeral[index]) return i + 1;
+    if (i >= SIZE_REQUIRE_TYPE_FLOAT && is_float == 1 && char_size[i] == numeral[index]) return i + 1;
   }
   return SIZE_WORD; // 16-bit is ' ' but can also be '';
 }
@@ -404,5 +405,81 @@ struct ACHIEVEMENT *get_achievement(char *achievement, size_t len)
   }
 
   output->group_count = max_group;
+  return output;
+}
+
+
+// TODO: this was made quickly, a rework of it wouldn't hurt.
+struct LEADERBOARD *get_leaderboard(char *leaderboard, size_t len)
+{
+  struct LEADERBOARD *output = malloc(sizeof(struct LEADERBOARD));
+
+  int start_index = 4;
+  int start_len;
+  int cancel_index = 0;
+  int cancel_len;
+  int submit_index = 0;
+  int submit_len;
+  int value_index = 0;
+  int value_len;
+
+  if (len < MINIMUM_LEADERBOARD_LENGTH)
+  {free(output); return NULL;} // TODO: add diag "leaderboard length is too small : $len"
+  if (strncmp(leaderboard, "STA:", 4) != 0)
+  {free(output); return NULL;} // TODO: add diag "leaderboard does not start with the START global_group"
+
+  for (int i = 4; i < len - 6; i ++)
+  {
+    if (strncmp(leaderboard + i, "::CAN:", 6) == 0)
+    {
+      cancel_index = i + 6;
+      start_len = i - start_index;
+    }
+    else if (strncmp(leaderboard + i, "::SUB:", 6) == 0)
+    {
+      submit_index = i + 6;
+      if (cancel_index == 0)
+      {free(output); return NULL;} // TODO: add diag "wrong order of global_groups in leaderboard"
+      cancel_len = i - cancel_index;
+    }
+    else if (strncmp(leaderboard + i, "::VAL:", 6) == 0)
+    {
+      value_index = i + 6;
+      if (submit_index == 0)
+      {free(output); return NULL;} // TODO: add diag "wrong order of global_groups in leaderboard"
+      submit_len = i - submit_index;
+    }
+  }
+
+  if (value_index == 0)
+  {free(output); return NULL;} // TODO: add diag "no VALUE global_group found in leaderboard"
+  value_len = len - value_index;
+
+  char *start_str = malloc(start_len + 1);
+  memcpy(start_str, leaderboard + start_index, start_len);
+  start_str[start_len] = '\0';
+
+  char *cancel_str = malloc(cancel_len + 1);
+  memcpy(cancel_str, leaderboard + cancel_index, cancel_len);
+  cancel_str[cancel_len] = '\0';
+
+  char *submit_str = malloc(submit_len + 1);
+  memcpy(submit_str, leaderboard + submit_index, submit_len);
+  submit_str[submit_len] = '\0';
+
+  char *value_str = malloc(value_len + 1);
+  memcpy(value_str, leaderboard + value_index, value_len);
+  value_str[value_len] = '\0';
+
+  output->start = get_achievement(start_str, start_len);
+  output->cancel = get_achievement(cancel_str, cancel_len);
+  output->submit = get_achievement(submit_str, submit_len);
+  output->value = get_achievement(value_str, value_len);
+
+  free(start_str);
+  free(cancel_str);
+  free(submit_str);
+  free(value_str);
+
   return output;
 }

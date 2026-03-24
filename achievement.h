@@ -118,4 +118,36 @@ struct ACHIEVEMENT
   struct GROUP *groups[];
 };
 
+typedef enum
+{
+  FORMAT_SCORE,
+  FORMAT_TIME_FRAMES,
+  FORMAT_TIME_CENTISECONDS,
+  FORMAT_TIME_SECONDS,
+  FORMAT_TIME_MINUTES,
+  FORMAT_TIME_SECONDS_AS_MINUTES,
+  FORMAT_VALUE,
+  FORMAT_VALUE_UNSIGNED,
+  FORMAT_VALUE_TENS,
+  FORMAT_VALUE_HUNDREDS,
+  FORMAT_VALUE_THOUSANDS,
+  FORMAT_VALUE_FIXED1,
+  FORMAT_VALUE_FIXED2,
+  FORMAT_VALUE_FIXED3
+} Format;
+
+struct LEADERBOARD
+{
+  int id;
+  char *title;
+  char *description;
+  Format format;
+  int lower_is_better;
+
+  struct ACHIEVEMENT *start;
+  struct ACHIEVEMENT *cancel;
+  struct ACHIEVEMENT *submit;
+  struct ACHIEVEMENT *value;
+};
+
 #endif // !ACHIEVEMENT_H
