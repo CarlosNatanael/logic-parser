@@ -125,7 +125,7 @@ typedef enum
 
 struct ACHIEVEMENT
 {
-  int id;
+  double id;
   char *title;
   char *description;
   int points;
@@ -154,7 +154,7 @@ typedef enum
 
 struct LEADERBOARD
 {
-  int id;
+  double id;
   char *title;
   char *description;
   Format format;
@@ -168,7 +168,7 @@ struct LEADERBOARD
 
 struct ACHIEVEMENT_SET
 {
-  int id;
+  double id;
   char *title;
   ConsoleID consoleID;
 
