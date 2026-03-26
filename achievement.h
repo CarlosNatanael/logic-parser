@@ -1,6 +1,7 @@
 #ifndef ACHIEVEMENT_H
 #define ACHIEVEMENT_H
 
+#include "RA_Consoles.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -108,14 +109,29 @@ struct GROUP
   struct CONDITION *conditions[];
 };
 
+struct ACHIEVEMENT_LOGIC
+{
+  size_t group_count;
+  struct GROUP *groups[];
+};
+
+typedef enum
+{
+  ACHIEVEMENT_TYPE_NONE,
+  ACHIEVEMENT_TYPE_PROGRESSION,
+  ACHIEVEMENT_TYPE_WIN_CONDITION,
+  ACHIEVEMENT_TYPE_MISSABLE
+} Achievement_type;
+
 struct ACHIEVEMENT
 {
   int id;
   char *title;
   char *description;
+  int points;
+  Achievement_type type;
 
-  size_t group_count;
-  struct GROUP *groups[];
+  struct ACHIEVEMENT_LOGIC *logic;
 };
 
 typedef enum
@@ -144,10 +160,25 @@ struct LEADERBOARD
   Format format;
   int lower_is_better;
 
-  struct ACHIEVEMENT *start;
-  struct ACHIEVEMENT *cancel;
-  struct ACHIEVEMENT *submit;
-  struct ACHIEVEMENT *value;
+  struct ACHIEVEMENT_LOGIC *start;
+  struct ACHIEVEMENT_LOGIC *cancel;
+  struct ACHIEVEMENT_LOGIC *submit;
+  struct ACHIEVEMENT_LOGIC *value;
+};
+
+struct ACHIEVEMENT_SET
+{
+  int id;
+  char *title;
+  ConsoleID consoleID;
+
+  size_t hub_count;
+  int **hub_ids;
+
+  size_t achievement_count;
+  struct ACHIEVEMENT **achievements;
+  size_t leaderboard_count;
+  struct LEADERBOARD **leaderboards;
 };
 
 #endif // !ACHIEVEMENT_H
