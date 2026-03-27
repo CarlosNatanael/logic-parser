@@ -34,7 +34,7 @@ struct CONDITION *get_condition(char condition[], size_t len);
 
 struct GROUP *get_group(char group[], size_t len);
 
-struct ACHIEVEMENT *get_achievement(char achievement[], size_t len);
+struct ACHIEVEMENT_LOGIC *get_achievement(char achievement[], size_t len);
 
 struct LEADERBOARD *get_leaderboard(char leaderboard[], size_t len);
 

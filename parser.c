@@ -372,13 +372,13 @@ struct GROUP *get_group(char *group, size_t len)
   return output;
 }
 
-struct ACHIEVEMENT *get_achievement(char *achievement, size_t len)
+struct ACHIEVEMENT_LOGIC *get_achievement(char *achievement, size_t len)
 {
   size_t max_group = 1;
   for (int i = 1; i < len; i ++)
     if (achievement[i] == group_separator && achievement[i - 1] != 'x') max_group ++;
 
-  struct ACHIEVEMENT *output = malloc(sizeof(struct ACHIEVEMENT) + sizeof(struct ACHIEVEMENT_LOGIC *));
+  struct ACHIEVEMENT_LOGIC *output = malloc(sizeof(struct ACHIEVEMENT_LOGIC) + sizeof(struct GROUP *) * max_group);
 
   int current_id = 0;
   int last_separator_index = 0;
@@ -401,15 +401,13 @@ struct ACHIEVEMENT *get_achievement(char *achievement, size_t len)
 
     group->id = current_id;
 
-    output->logic = malloc(sizeof(struct ACHIEVEMENT_LOGIC) + sizeof(struct GROUP *) * max_group);
-
-    output->logic->groups[current_id] = group;
+    output->groups[current_id] = group;
     current_id++;
 
     last_separator_index = i + 1;
   }
 
-  output->logic->group_count = max_group;
+  output->group_count = max_group;
   return output;
 }
 
@@ -476,10 +474,10 @@ struct LEADERBOARD *get_leaderboard(char *leaderboard, size_t len)
   memcpy(value_str, leaderboard + value_index, value_len);
   value_str[value_len] = '\0';
 
-  output->start = get_achievement(start_str, start_len)->logic;
-  output->cancel = get_achievement(cancel_str, cancel_len)->logic;
-  output->submit = get_achievement(submit_str, submit_len)->logic;
-  output->value = get_achievement(value_str, value_len)->logic;
+  output->start = get_achievement(start_str, start_len);
+  output->cancel = get_achievement(cancel_str, cancel_len);
+  output->submit = get_achievement(submit_str, submit_len);
+  output->value = get_achievement(value_str, value_len);
 
   free(start_str);
   free(cancel_str);
@@ -512,7 +510,8 @@ struct ACHIEVEMENT *get_achievement_from_json(const cJSON *json_achievement, int
     return NULL;
   }
 
-  struct ACHIEVEMENT *achievement = get_achievement(logic->valuestring, strlen(logic->valuestring));
+  struct ACHIEVEMENT *achievement = malloc(sizeof(struct ACHIEVEMENT));
+  achievement->logic = get_achievement(logic->valuestring, strlen(logic->valuestring));
   achievement->id = id->valueint;
 
   achievement->title = malloc(strlen(title->valuestring) + 1);
