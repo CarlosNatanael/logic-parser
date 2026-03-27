@@ -653,7 +653,7 @@ struct ACHIEVEMENT_SET *get_achievement_set_from_json(const cJSON *achievement_s
   }
 
   if (strcmp(type->valuestring, "core") == 0) output->type = SET_CORE;
-  else if (strcmp(type->valuestring, "subset") == 0) output->type = SET_SUBSET;
+  else if (strcmp(type->valuestring, "bonus") == 0) output->type = SET_SUBSET;
   else
   {
     *status = UNKNOWN_SET_TYPE;
@@ -722,6 +722,7 @@ struct GAME *get_game_from_json(char *path)
     status = WRONG_JSON_OBJECT_TYPE;
     goto end;
   }
+  printf("%d| %s   nb of sets : %d\n", gameID->valueint, title->valuestring, cJSON_GetArraySize(achievement_sets));
 
   int set_count = cJSON_GetArraySize(achievement_sets);
   struct GAME *output = malloc(sizeof(struct GAME) + sizeof(struct ACHIEVEMENT_SET *) * set_count);
