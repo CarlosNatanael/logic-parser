@@ -107,9 +107,8 @@ struct ACHIEVEMENT
 ```
 <br>
 
-- `LEADERBOARD` represents an array of 4 `ACHIEVEMENT` called respectively `START`, `CANCEL`, `SUBMIT` and `VALUE`
+- `LEADERBOARD` represents an array of 4 `ACHIEVEMENT_LOGIC` called respectively `START`, `CANCEL`, `SUBMIT` and `VALUE`
 >[!NOTE]
-> Each of these aren't technically achievements, but they can be represented as is   
 > when `START` is true, the leaderboard start a new entry   
 > when `CANCEL` is true, the leaderboard cancel any on going entries   
 > when `SUBMIT` is true, the leaderboard submit the entry to [retroachievements](https://retroachievements.org)   
