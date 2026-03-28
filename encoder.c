@@ -115,3 +115,39 @@ char* encode_logic(struct ACHIEVEMENT_LOGIC *logic) {
 
     return buffer;
 }
+
+char* encode_leaderboard(struct LEADERBOARD *leaderboard) {
+    if (!leaderboard) return NULL;
+
+    // Encode the 4 parts using your existing function
+    char *start_str = encode_logic(leaderboard->start);
+    char *cancel_str = encode_logic(leaderboard->cancel);
+    char *submit_str = encode_logic(leaderboard->submit);
+    char *value_str = encode_logic(leaderboard->value);
+
+    // Protection: if any logic returns NULL, we treat it as an empty string ""
+    const char *s_str = start_str ? start_str : "";
+    const char *c_str = cancel_str ? cancel_str : "";
+    const char *sub_str = submit_str ? submit_str : "";
+    const char *v_str = value_str ? value_str : "";
+
+    // Calculate the exact size needed for the final string
+    // Tag sizes (STA:=4, ::CAN:=6, ::SUB:=6, ::VAL:=6) -> 22 bytes
+    // + the size of each string + 1 byte for the final '\0'
+    size_t total_len = 22 + strlen(s_str) + strlen(c_str) + strlen(sub_str) + strlen(v_str) + 1;
+
+    // Allocate the exact memory
+    char *buffer = malloc(total_len);
+    if (buffer) {
+        snprintf(buffer, total_len, "STA:%s::CAN:%s::SUB:%s::VAL:%s", 
+                 s_str, c_str, sub_str, v_str);
+    }
+
+    // Free the intermediate strings that were allocated by encode_logic
+    if (start_str) free(start_str);
+    if (cancel_str) free(cancel_str);
+    if (submit_str) free(submit_str);
+    if (value_str) free(value_str);
+
+    return buffer;
+}
