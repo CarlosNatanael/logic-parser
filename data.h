@@ -39,8 +39,8 @@
   for \
   ( \
     int i = 0; \
-    i < (game)->set_count; \
-    i++, (set) = (game)->sets[i] \
+    i < (game)->set_count && ((set) = (game)->sets[i], 1); \
+    i ++ \
   )
 
 void append_conditions(struct CONDITION *condition_head, struct GROUP *group);
