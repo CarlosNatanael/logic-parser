@@ -9,8 +9,8 @@ const char* OP_STR[] = {
     "", "=", "<", "<=", ">", ">=", "!=", "*", "/", "%", "+", "-", "&", "^"
 };
 
-// --- HELPERS PARA O FORMATO TXT DO EMULADOR ---
-// Converte o enum Format de volta para a string do TXT
+// --- EMULATOR TXT FORMAT HELPERS ---
+// Converts the Format enum back to its corresponding TXT string
 const char* get_format_txt(Format format) {
     switch(format) {
         case FORMAT_SCORE: return "SCORE";
@@ -31,10 +31,10 @@ const char* get_format_txt(Format format) {
     }
 }
 
-// Converte o Achievement_type para os IDs numéricos usados pelo RAIntegration
+// Maps Achievement_type to the numerical IDs used by RAIntegration
 int get_achievement_type_txt(Achievement_type type) {
     switch(type) {
-        case ACHIEVEMENT_TYPE_NONE: return 0; // Fica vazio no TXT
+        case ACHIEVEMENT_TYPE_NONE: return 0; // Remains empty in the TXT
         case ACHIEVEMENT_TYPE_PROGRESSION: return 3;
         case ACHIEVEMENT_TYPE_WIN_CONDITION: return 4;
         case ACHIEVEMENT_TYPE_MISSABLE: return 5;
@@ -152,13 +152,13 @@ char* encode_logic(struct ACHIEVEMENT_LOGIC *logic) {
 char* encode_leaderboard(struct LEADERBOARD *leaderboard) {
     if (!leaderboard) return NULL;
 
-    // Encode the 4 parts using your existing function
+    // Encode the 4 parts using existing functions
     char *start_str = encode_logic(leaderboard->start);
     char *cancel_str = encode_logic(leaderboard->cancel);
     char *submit_str = encode_logic(leaderboard->submit);
     char *value_str = encode_logic(leaderboard->value);
 
-    // Protection: if any logic returns NULL, we treat it as an empty string ""
+    // Protection: if any logic returns NULL, treat it as an empty string ""
     const char *s_str = start_str ? start_str : "";
     const char *c_str = cancel_str ? cancel_str : "";
     const char *sub_str = submit_str ? submit_str : "";
@@ -176,7 +176,7 @@ char* encode_leaderboard(struct LEADERBOARD *leaderboard) {
                  s_str, c_str, sub_str, v_str);
     }
 
-    // Free the intermediate strings that were allocated by encode_logic
+    // Free the intermediate strings allocated by encode_logic
     if (start_str) free(start_str);
     if (cancel_str) free(cancel_str);
     if (submit_str) free(submit_str);
@@ -190,13 +190,13 @@ char* encode_leaderboard(struct LEADERBOARD *leaderboard) {
 char* encode_leaderboard_txt(struct LEADERBOARD *leaderboard) {
     if (!leaderboard) return NULL;
 
-    // Generates the logic using the base functions
+    // Generate logic using the base functions
     char *start_str = encode_logic(leaderboard->start);
     char *cancel_str = encode_logic(leaderboard->cancel);
     char *submit_str = encode_logic(leaderboard->submit);
     char *value_str = encode_logic(leaderboard->value);
 
-    // Protection against nulls
+    // Null protection
     const char *s_str = start_str ? start_str: "";
     const char *c_str = cancel_str ? cancel_str: "";
     const char *sub_str = submit_str ? submit_str: "";
@@ -206,7 +206,7 @@ char* encode_leaderboard_txt(struct LEADERBOARD *leaderboard) {
     const char *title = leaderboard->title ? leaderboard->title : "";
     const char *desc = leaderboard->description ? leaderboard->description : "";
 
-    // Calculate size for the string: L_ID:"Start":"Cancel":"Submit":"Value":FORMAT:Title:Description:LowerIsBetter
+    // Calculate string size: L_ID:"Start":"Cancel":"Submit":"Value":FORMAT:Title:Description:LowerIsBetter
     size_t total_len = 50 + strlen(s_str) + strlen(c_str) + strlen(sub_str) + strlen(v_str) +
                        strlen(format_str) + strlen(title) + strlen(desc);
 
@@ -217,7 +217,7 @@ char* encode_leaderboard_txt(struct LEADERBOARD *leaderboard) {
                  format_str, title, desc, leaderboard->lower_is_better);
     }
 
-    // Free up intermediate memory
+    // Free intermediate memory
     if (start_str) free(start_str);
     if (cancel_str) free(cancel_str);
     if (submit_str) free(submit_str);
@@ -241,8 +241,8 @@ char* encode_achievement_txt(struct ACHIEVEMENT *achievement) {
 
     char *buffer = malloc(total_len);
     if (buffer) {
-        // If the type is 0 (None), RA leaves this field completely empty (::::)
-        // We set the "Author" to Unknown and the default "Badge" to 00000 to be valid in the emulator.
+        // If type is 0 (None), RA leaves this field empty (::::)
+        // Author is set to "Unknown" and default Badge to "00000" for emulator compatibility
         if (type_val == 0) {
             snprintf(buffer, total_len, "%d:\"%s\":\"%s\":\"%s\"::::Unknown:%d:::::00000",
                      achievement->id, l_str, title, desc, achievement->points);
@@ -258,47 +258,47 @@ char* encode_achievement_txt(struct ACHIEVEMENT *achievement) {
 }
 
 int export_game_to_txt(struct GAME *game) {
-    if (!game) return 0; // Falha se não houver jogo
+    if (!game) return 0; // Fail if no game is provided
 
-    // Criar o nome do ficheiro (ex: 1234-User.txt)
+    // Create filename (e.g., 1234-User.txt)
     char filename[256];
     snprintf(filename, sizeof(filename), "%d-User.txt", game->id);
 
     FILE *file = fopen(filename, "w");
-    if (!file) return 0; // Falha se não conseguir criar o ficheiro
+    if (!file) return 0; // Fail if file creation fails
 
-    // 1. Escrever o Cabeçalho (Versão e Título)
+    // 1. Write Header (Version and Title)
     fprintf(file, "1.0\n");
     fprintf(file, "%s\n", game->title ? game->title : "Unknown Game");
 
-    // 2. Percorrer todos os Sets do jogo (Core, Bonus, etc.)
+    // 2. Iterate through all Game Sets (Core, Bonus, etc.)
     for (size_t i = 0; i < game->set_count; i++) {
         struct ACHIEVEMENT_SET *set = game->sets[i];
         if (!set) continue;
 
-        // 3. Escrever todas as Conquistas deste Set
+        // 3. Write all Achievements from this Set
         struct ACHIEVEMENT *ach = set->achievement_head;
         while (ach) {
             char *ach_str = encode_achievement_txt(ach);
             if (ach_str) {
                 fprintf(file, "%s\n", ach_str);
-                free(ach_str); // Limpar a memória da string após gravar
+                free(ach_str); // Cleanup string memory after writing
             }
             ach = ach->next;
         }
 
-        // 4. Escrever todas as Leaderboards deste Set
+        // 4. Write all Leaderboards from this Set
         struct LEADERBOARD *lb = set->leaderboard_head;
         while (lb) {
             char *lb_str = encode_leaderboard_txt(lb);
             if (lb_str) {
                 fprintf(file, "%s\n", lb_str);
-                free(lb_str); // Limpar a memória da string após gravar
+                free(lb_str); // Cleanup string memory after writing
             }
             lb = lb->next;
         }
     }
 
     fclose(file);
-    return 1; // Sucesso!
+    return 1; // Success!
 }
