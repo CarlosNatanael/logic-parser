@@ -256,3 +256,49 @@ char* encode_achievement_txt(struct ACHIEVEMENT *achievement) {
 
     return buffer;
 }
+
+int export_game_to_txt(struct GAME *game) {
+    if (!game) return 0; // Falha se não houver jogo
+
+    // Criar o nome do ficheiro (ex: 1234-User.txt)
+    char filename[256];
+    snprintf(filename, sizeof(filename), "%d-User.txt", game->id);
+
+    FILE *file = fopen(filename, "w");
+    if (!file) return 0; // Falha se não conseguir criar o ficheiro
+
+    // 1. Escrever o Cabeçalho (Versão e Título)
+    fprintf(file, "1.0\n");
+    fprintf(file, "%s\n", game->title ? game->title : "Unknown Game");
+
+    // 2. Percorrer todos os Sets do jogo (Core, Bonus, etc.)
+    for (size_t i = 0; i < game->set_count; i++) {
+        struct ACHIEVEMENT_SET *set = game->sets[i];
+        if (!set) continue;
+
+        // 3. Escrever todas as Conquistas deste Set
+        struct ACHIEVEMENT *ach = set->achievement_head;
+        while (ach) {
+            char *ach_str = encode_achievement_txt(ach);
+            if (ach_str) {
+                fprintf(file, "%s\n", ach_str);
+                free(ach_str); // Limpar a memória da string após gravar
+            }
+            ach = ach->next;
+        }
+
+        // 4. Escrever todas as Leaderboards deste Set
+        struct LEADERBOARD *lb = set->leaderboard_head;
+        while (lb) {
+            char *lb_str = encode_leaderboard_txt(lb);
+            if (lb_str) {
+                fprintf(file, "%s\n", lb_str);
+                free(lb_str); // Limpar a memória da string após gravar
+            }
+            lb = lb->next;
+        }
+    }
+
+    fclose(file);
+    return 1; // Sucesso!
+}

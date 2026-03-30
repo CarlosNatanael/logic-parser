@@ -11,5 +11,6 @@ int encode_numeral(char *buffer, size_t max_size, struct NUMERAL *num);
 char* encode_leaderboard(struct LEADERBOARD *leaderboard);
 char* encode_achievement_txt(struct ACHIEVEMENT *achievement);
 char* encode_leaderboard_txt(struct LEADERBOARD *leaderboard);
+int export_game_to_txt(struct GAME *game);
 
 #endif // ENCODER_H
