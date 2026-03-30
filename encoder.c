@@ -187,7 +187,7 @@ char* encode_leaderboard(struct LEADERBOARD *leaderboard) {
 
 // --- EXPORT FUNCTIONS (.TXT) ---
 
-char* encode_leaderbaord_txt(struct LEADERBOARD *leaderboard) {
+char* encode_leaderboard_txt(struct LEADERBOARD *leaderboard) {
     if (!leaderboard) return NULL;
 
     // Generates the logic using the base functions
